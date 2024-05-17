@@ -8,18 +8,15 @@ from config import (
 )
 
 
-
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
-
 
 #создает большую нагрузку в случае большого количества запросов к боту
 logging.basicConfig(level=logging.INFO)
 
-
 @dp.message(CommandStart(deep_link=False))
 async def handler_start(message: Message):
-    #функция для дебага, в случае если ссылка не передается
+    #функция для ответа пользователю если получено сообщение без depp link
     print("Переход без ссылки")
     await message.answer("Добрый день")
 
