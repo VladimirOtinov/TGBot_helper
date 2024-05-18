@@ -44,20 +44,21 @@ async def handle_message(message: Message, state: FSMContext):
 
     # Сохранение данных в состоянии
     await state.update_data(user_message=message.text)
-    await message.answer("Ваше сообщение было сохранено. Для отправки нажмите /send.")
+    await message.answer("Ваше сообщение было сохранено. Для отправки нажмите или введите /send.")
     await state.set_state(Form.waiting_for_send)
 
 # Обработчик команды /send
 @dp.message(Command(commands=["send"]))
 async def handle_send(message: Message, state: FSMContext):
     state_data = await state.get_data()
-    deep_link_id = state_data.get("deep_link_id")
+    user_id = message.from_user.id
     user_message = state_data.get("user_message")
+    deep_link_id = state_data.get("deep_link_id")
 
     if user_message:
         # Формирование данных для отправки по почте
         email_data = {
-            'user_id': deep_link_id,
+            'user_id': user_id,
             'message': user_message
         }
         email_content = json.dumps(email_data, indent=4)
@@ -67,11 +68,11 @@ async def handle_send(message: Message, state: FSMContext):
     else:
         await message.answer("Сообщение не найдено. Пожалуйста, опишите вашу ошибку еще раз.")
 
-async def send_email(content: str, subject: str):
+async def send_email(content: str, deep_link_id: int):
     msg = MIMEMultipart()
     msg['From'] = BOT_EMAIL
     msg['To'] = SUPPORT_EMAIL
-    msg['Subject'] = subject
+    msg['Subject'] = f"{deep_link_id}"
     msg.attach(MIMEText(content, 'plain'))
 
     await send(
