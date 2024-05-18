@@ -1,7 +1,7 @@
 import json
 import logging
 import asyncio
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
@@ -30,7 +30,9 @@ async def handle_start(message: Message, state: FSMContext):
     if len(args) > 1:
         deep_link_id = args[1]
         await state.update_data(deep_link_id=deep_link_id)
-        await message.answer(f"Для теста, параметр ссылки: {deep_link_id}")
+        #await message.answer(f"Для теста, параметр ссылки: {deep_link_id}")
+        await message.answer("Добрый день! Я бот для передачи информации в тех. поддержку. "
+                            "Опишите вашу ошибку, я передам ее нашим специалистам.")
         await state.set_state(Form.waiting_for_message)
     else:
         await message.answer("Добрый день")
@@ -50,7 +52,7 @@ async def handle_message(message: Message, state: FSMContext):
     email_content = json.dumps(email_data, indent=4)
     await send_email(email_content)
     await message.answer("Ваше обращение было передано в тех. поддержку")
-    await state.finish()
+    await state.clear()
 
 
 async def send_email(content: str):
