@@ -6,15 +6,15 @@
 Необходимо добавить в каталог с `main.py` файл `config.py`, с подобным заполнением конфигурационными файлами:
 ```python3
 TOKEN =  'bot_token'
-SERVER = 'smtp.yandex.ru'
+SERVER = 'smtp.mail.ru'
 PORT = 465
-BOT_EMAIL = 'your_bot_email@yandex.ru'
+BOT_EMAIL = 'your_bot_email@mail.ru'
 EMAIL_PASSWORD = 'password_from_bot_email'
-SUPPORT_EMAIL = 'support@mail.ru'
+SUPPORT_EMAIL = 'support@yandex.ru'
 ```
 ### Где:
 1. TOKEN - токен от бота
-2. SERVER - это SMTP сервер, в моем случае им был Яндекс
+2. SERVER - это SMTP сервер, в моем случае им был Mail.ru
 3. PORT - порт для отправки, в моем случае это был 465 для защищенного SSL-соединения
 4. BOT_EMAIL - почтовый адрес, который будет использовать бот для отправки сообщений
 5. EMAIL_PASSWORD - пароль от почтового адреса бота
