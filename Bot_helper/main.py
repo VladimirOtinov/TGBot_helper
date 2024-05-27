@@ -10,7 +10,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiosmtplib import send
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from config import TOKEN, SERVER, PORT, SUPPORT_EMAIL, BOT_EMAIL, EMAIL_PASSWORD
+from config import TOKEN, SMTP_SERVER, SMTP_PORT, SUPPORT_EMAIL, BOT_EMAIL, EMAIL_PASSWORD
 
 # Настройка бота и диспетчера
 bot = Bot(token=TOKEN)
@@ -77,8 +77,8 @@ async def send_email(content: str, deep_link_id: int):
 
     await send(
         msg,
-        hostname=SERVER,
-        port=PORT,
+        hostname=SMTP_SERVER,
+        port=SMTP_PORT,
         username=BOT_EMAIL,
         password=EMAIL_PASSWORD,
         use_tls=True
