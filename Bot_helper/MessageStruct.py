@@ -7,8 +7,8 @@ class MessageStruct:
 
     def to_json(self):
         return {
-            "uid": self.uid,
-            "deep_link": self.deep_link,
-            "time_send": self.time_send,
-            "text_message": self.text_message
+            "uid": f"{self.uid}",
+            "deep_link": f"{self.deep_link}",
+            "time_send": f"{self.time_send}",
+            "text_message": f"{self.text_message}"
         }
