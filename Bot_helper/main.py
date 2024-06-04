@@ -40,6 +40,22 @@ async def handle_start(message: Message, state: FSMContext):
         await message.answer("Добрый день")
         await state.set_state(Form.waiting_for_message)
 
+# Обработчик команды /send
+@dp.message(Form.waiting_for_message, Command(commands=["send"]))
+async def handle_send(message: Message, state: FSMContext):
+    state_data = await state.get_data()
+    messages = state_data.get("messages", [])
+
+    if messages:
+        # Формирование JSON-данных для отправки
+        email_content = json.dumps(messages, indent=4, ensure_ascii=False)
+        subject = f"param: {state_data.get('deep_link_id', '')} uid: {state_data.get('user_id', '')}"
+        await send_email(email_content, subject)
+        await message.answer("Ваше обращение было передано в тех. поддержку.")
+        await state.clear()
+    else:
+        await message.answer("Нет сохраненных сообщений. Пожалуйста, опишите вашу проблему еще раз.")
+
 # Обработчик обычных сообщений
 @dp.message(Form.waiting_for_message)
 async def handle_message(message: Message, state: FSMContext):
@@ -59,21 +75,6 @@ async def handle_message(message: Message, state: FSMContext):
 
     await message.answer("Ваше сообщение было сохранено. Для отправки всех сообщений введите /send.")
 
-# Обработчик команды /send
-@dp.message(Form.waiting_for_message, Command(commands=["send"]))
-async def handle_send(message: Message, state: FSMContext):
-    state_data = await state.get_data()
-    messages = state_data.get("messages", [])
-
-    if messages:
-        # Формирование JSON-данных для отправки
-        email_content = json.dumps(messages, indent=4, ensure_ascii=False)
-        subject = f"param: {state_data.get('deep_link_id', '')} uid: {state_data.get('user_id', '')}"
-        await send_email(email_content, subject)
-        await message.answer("Ваше обращение было передано в тех. поддержку.")
-        await state.clear()
-    else:
-        await message.answer("Нет сохраненных сообщений. Пожалуйста, опишите вашу проблему еще раз.")
 
 async def send_email(content: str, subject: str):
     from email.mime.multipart import MIMEMultipart
