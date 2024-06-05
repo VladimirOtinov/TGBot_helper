@@ -103,10 +103,12 @@ async def send_email(content: str, subject: str):
         use_tls=True
     )
 
+
 async def check_email():
+    from bs4 import BeautifulSoup
     while True:
         logging.info("Проверка наличия новых писем...")  # Логирование проверки новых писем
-        with IMAP4_SSL(IMAP_SERVER, IMAP_PORT) as mail:  # Подключение к IMAP серверу
+        with IMAP4_SSL(IMAP_SERVER, IMAP_PORT) as mail:  # Подключение к IMAP серверу с использованием SSL
             mail.login(BOT_EMAIL, EMAIL_PASSWORD)  # Аутентификация на почтовом сервере
             mail.select('inbox')  # Выбор папки "входящие"
 
@@ -118,18 +120,23 @@ async def check_email():
                 status, data = mail.fetch(num, '(RFC822)')  # Получение данных письма по его идентификатору
                 logging.info(f"Найдено письмо ID {num}, статус: {status}")  # Логирование статуса получения письма
 
-                email_message = BytesParser(policy=policy.default).parsebytes(data[0][1])  # Парсинг письма в объект BytesParser
+                # Парсинг письма в объект BytesParser
+                email_message = BytesParser(policy=policy.default).parsebytes(data[0][1])
                 for part in email_message.walk():  # Перебор частей письма
-                    if part.get_content_type() == 'text/plain':  # Проверка типа части письма (текст)
-                        body = part.get_payload(decode=True).decode()  # Получение текстового содержимого письма
-                        logging.info(f"Содержимое письма: {body}")  # Логирование текстового содержимого письма
+                    if part.get_content_type() == 'text/html':  # Проверка типа части письма (HTML)
+                        body = part.get_payload(decode=True).decode()  # Получение HTML содержимого письма
+                        logging.info(f"Содержимое письма: {body}")  # Логирование HTML содержимого письма
                         try:
-                            message_data = json.loads(body)  # Парсинг JSON данных из текста письма
+                            # Использование BeautifulSoup для извлечения текста из HTML
+                            soup = BeautifulSoup(body, 'html.parser')
+                            text = soup.get_text(separator='', strip=True)  # Извлечение текста из HTML, удаление лишних пробелов
+                            message_data = json.loads(text)  # Парсинг JSON данных из текста
                             await process_support_message(message_data)  # Обработка полученных данных
                         except json.JSONDecodeError:
                             logging.error("Ошибка декодинга JSON из письма")  # Логирование ошибки при декодировании JSON
 
         await asyncio.sleep(60)  # Пауза в выполнении для проверки почты каждые 60 секунд
+
 
 async def process_support_message(data):
     uid = data.get('uid')  # Извлечение идентификатора пользователя
