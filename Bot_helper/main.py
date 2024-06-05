@@ -107,14 +107,14 @@ async def send_email(content: str, subject: str):
 async def check_email():
     from bs4 import BeautifulSoup
     while True:
-        logging.info("Проверка наличия новых писем...")  # Логирование проверки новых писем
-        with IMAP4_SSL(IMAP_SERVER, IMAP_PORT) as mail:  # Подключение к IMAP серверу с использованием SSL
-            mail.login(BOT_EMAIL, EMAIL_PASSWORD)  # Аутентификация на почтовом сервере
-            mail.select('inbox')  # Выбор папки "входящие"
+        logging.info("Проверка наличия новых писем...")
+        with IMAP4_SSL(IMAP_SERVER, IMAP_PORT) as mail:
+            mail.login(BOT_EMAIL, EMAIL_PASSWORD)
+            mail.select('inbox')
 
             status, messages = mail.search(None, '(UNSEEN)')  # Поиск непрочитанных писем
-            logging.info(f"Статус проверки писем: {status}")  # Логирование статуса поиска новых писем
-            logging.info(f"Найдено {len(messages[0].split())} новых писем.")  # Логирование количества новых писем
+            logging.info(f"Статус проверки писем: {status}")
+            logging.info(f"Найдено {len(messages[0].split())} новых писем.")
 
             for num in messages[0].split():  # Перебор идентификаторов новых писем
                 status, data = mail.fetch(num, '(RFC822)')  # Получение данных письма по его идентификатору
@@ -133,7 +133,7 @@ async def check_email():
                             message_data = json.loads(text)  # Парсинг JSON данных из текста
                             await process_support_message(message_data)  # Обработка полученных данных
                         except json.JSONDecodeError:
-                            logging.error("Ошибка декодинга JSON из письма")  # Логирование ошибки при декодировании JSON
+                            logging.error("Ошибка декодинга JSON из письма")
 
         await asyncio.sleep(60)  # Пауза в выполнении для проверки почты каждые 60 секунд
 
@@ -144,7 +144,6 @@ async def process_support_message(data):
     text_message = data.get('text_message')  # Извлечение текста сообщения
 
     logging.info(f"Обработка сообщения службы поддержки: {data}")  # Логирование обработки сообщения
-    await bot.send_message(chat_id=chat_id, text=text_message)
     if uid and chat_id and text_message:  # Если все необходимые данные присутствуют
         await bot.send_message(chat_id=chat_id, text=text_message)  # Отправка сообщения пользователю
         logging.info(f"Сообщение отправлено пользователю {uid}")  # Логирование отправки сообщения
@@ -160,5 +159,4 @@ async def main():
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)  # Установка уровня логирования INFO
-    asyncio.run(main())  # Запуск основной асинхронной функции
-
+    asyncio.run(main())
