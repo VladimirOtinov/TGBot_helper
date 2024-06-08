@@ -35,7 +35,8 @@ async def handle_start(message: Message, state: FSMContext):
         await state.update_data(deep_link_id=deep_link_id)
         await message.answer(
             "Добрый день! Я бот для передачи информации в тех. поддержку. "
-            "Опишите вашу проблему в нескольких сообщениях, затем отправьте "
+            "Опишите вашу проблему в одном или нескольких сообщениях, также помимо "
+            "текста вы можете приложить фото или видео. Затем напишите или нажмите на "
             "/send для отправки сообщений."
         )
         await state.set_state(Form.waiting_for_message)
@@ -69,13 +70,26 @@ async def handle_message(message: Message, state: FSMContext):
     state_data = await state.get_data()
     messages = state_data.get("messages", [])  # Получение сохраненных сообщений из состояния
 
+    photo_url = None
+    if message.photo:
+        largest_photo = message.photo[-1]  # Берем последнее фото, так как оно самое большое
+        file_info = await bot.get_file(largest_photo.file_id)
+        photo_url = f"https://api.telegram.org/file/bot{TOKEN}/{file_info.file_path}"
+
+    video_url = None
+    if message.video:
+        file_info = await bot.get_file(message.video.file_id)
+        video_url = f"https://api.telegram.org/file/bot{TOKEN}/{file_info.file_path}"
+
     # Формирование объекта MessageStruct
     message_struct = MessageStruct(
-        text_message=message.text,
+        text_message=message.text if message.text else "None",
         uid=message.from_user.id,
         time_send=datetime.now().strftime("%H:%M:%S"),
         deep_link=state_data.get("deep_link_id", ""),
-        chat_id=message.chat.id
+        chat_id=message.chat.id,
+        photo=[photo_url] if photo_url else None,
+        video=video_url
     )
 
     messages.append(message_struct.to_json())  # Добавление нового сообщения в список сохраненных
