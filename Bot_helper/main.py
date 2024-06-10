@@ -72,7 +72,7 @@ async def handle_message(message: Message, state: FSMContext):
 
     photo_url = None
     if message.photo:
-        largest_photo = message.photo[-1]  # Берем последнее фото, так как оно самое большое
+        largest_photo = message.photo[-1]  # Берем последнее фото, так как оно самое большое по размеру
         file_info = await bot.get_file(largest_photo.file_id)
         photo_url = f"https://api.telegram.org/file/bot{TOKEN}/{file_info.file_path}"
 
